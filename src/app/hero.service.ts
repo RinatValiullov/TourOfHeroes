@@ -18,15 +18,6 @@ export class HeroService {
 
   private heroesUrl = 'api/heroes'; // url to Web API
 
-  // get heroes from the server
-  getHeroes(): Observable<Hero[]> {
-    return this.http.get<Hero[]>(this.heroesUrl)
-      .pipe(
-        tap(_ => this.log(`fetched heroes`)),
-        catchError(this.handleError<Hero[]>(`getHeroes:`, []))
-      );
-  }
-
   /**
    *  Handle Http operation that failed.
    * Let the app continue
@@ -47,16 +38,38 @@ export class HeroService {
     };
   }
 
+  /** get heroes from the server */
+  getHeroes(): Observable<Hero[]> {
+    return this.http.get<Hero[]>(this.heroesUrl)
+      .pipe(
+        tap(_ => this.log(`fetched heroes`)),
+        catchError(this.handleError<Hero[]>(`getHeroes:`, []))
+      );
+  }
+
   /** Get hero by id. Will 404 if id not found. */
   getHero(id: number): Observable<Hero> {
     // For now, assume that a hero with the specifed 'id' always exists.
-    // Error handling will be added in the next step of the tutorial
     const url = `${this.heroesUrl}/${id}`;
-    return this.http.get<Hero>(url).pipe(
-      tap(_ => this.log(`feched hero id=${id}`)),
-      catchError(this.handleError<Hero>(`get hero id=${id}`))
+    return this.http.get<Hero>(url)
+      .pipe(
+        tap(_ => this.log(`feched hero id=${id}`)),
+        catchError(this.handleError<Hero>(`get hero id=${id}`))
+      );
+  }
+
+  httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  }
+
+  /** PUT: update the hero on the server */
+  updateHero(hero: Hero): Observable<any> {
+    return this.http.put(this.heroesUrl, hero, this.httpOptions).pipe(
+      tap(() => this.log(`updated hero id=${hero.id}`)),
+      catchError(this.handleError<any>(`updateHero`))
     );
   }
+
 
   private log(message: string) {
     this.messageService.add(`HeroService: ${message}`);
