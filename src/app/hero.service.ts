@@ -22,6 +22,7 @@ export class HeroService {
   getHeroes(): Observable<Hero[]> {
     return this.http.get<Hero[]>(this.heroesUrl)
       .pipe(
+        tap(_ => this.log(`fetched heroes`)),
         catchError(this.handleError<Hero[]>(`getHeroes:`, []))
       );
   }
@@ -46,12 +47,15 @@ export class HeroService {
     };
   }
 
+  /** Get hero by id. Will 404 if id not found. */
   getHero(id: number): Observable<Hero> {
     // For now, assume that a hero with the specifed 'id' always exists.
     // Error handling will be added in the next step of the tutorial
-    const hero = HEROES.find(h => h.id === id)!;
-    this.messageService.add(`HeroService: fetched hero id=${id}`);
-    return of(hero);
+    const url = `${this.heroesUrl}/${id}`;
+    return this.http.get<Hero>(url).pipe(
+      tap(_ => this.log(`feched hero id=${id}`)),
+      catchError(this.handleError<Hero>(`get hero id=${id}`))
+    );
   }
 
   private log(message: string) {
